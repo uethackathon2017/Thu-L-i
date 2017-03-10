@@ -16,6 +16,10 @@ class Checkin(Resource):
         body = parser.parse_args()
         name = body.name
         date = body.date
+        for checkin_res in CheckinClass.objects():
+            if checkin_res.name==name:
+                if checkin_res.date==date:
+                    return {"message":"data existed"},401
         students = body["students"]
         checkin = CheckinClass(name=name, date=date, students=students)
         checkin.save()
