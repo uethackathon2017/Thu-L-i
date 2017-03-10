@@ -22,6 +22,8 @@ import retrofit2.Response;
 
 public class DbStudentContext {
     private final String TAG = DbStudentContext.class.toString();
+    public static final DbStudentContext instance = new DbStudentContext();
+
     private List<Student> students;
     private List<StudentRespon> studentRespon;
     private String idGroup;

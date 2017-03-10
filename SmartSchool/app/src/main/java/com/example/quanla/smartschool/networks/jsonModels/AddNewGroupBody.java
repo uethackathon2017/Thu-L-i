@@ -36,9 +36,5 @@ public class AddNewGroupBody {
         this.userdata = userdata;
     }
 
-    public AddNewGroupBody(String name, String userdata) {
 
-        this.name = name;
-        this.userdata = userdata;
-    }
 }
