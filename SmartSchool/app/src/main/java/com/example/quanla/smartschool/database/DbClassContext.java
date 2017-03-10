@@ -1,10 +1,11 @@
 package com.example.quanla.smartschool.database;
 
+import android.support.v7.view.ActionBarPolicy;
 import android.util.Log;
 
 import com.example.quanla.smartschool.database.model.ClassStudent;
-import com.example.quanla.smartschool.evenbus.GetDataFaildedEvent;
-import com.example.quanla.smartschool.evenbus.GetDataSuccusEvent;
+import com.example.quanla.smartschool.eventbus.GetDataFaildedEvent;
+import com.example.quanla.smartschool.eventbus.GetDataSuccusEvent;
 import com.example.quanla.smartschool.networks.NetContextMicrosoft;
 import com.example.quanla.smartschool.networks.services.ClassService;
 
@@ -45,14 +46,16 @@ public class DbClassContext {
                     Log.e(TAG, String.format("onResponse: %s", students.get(i)) );
                 }
                 Log.e(TAG, "onResponse: load hết group");
-                EventBus.getDefault().post(new GetDataSuccusEvent(students));
+                EventBus.getDefault().postSticky(new GetDataSuccusEvent());
             }
 
             @Override
             public void onFailure(Call<List<ClassStudent>> call, Throwable t) {
                 Log.e(TAG, String.format("onFailure: %s", t.toString()));
-                EventBus.getDefault().post(new GetDataFaildedEvent());
+                EventBus.getDefault().postSticky(new GetDataFaildedEvent());
             }
         });
     }
+
+
 }

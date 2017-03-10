@@ -11,7 +11,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.ListClassActivity" />
         <activity android:name=".activities.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,7 +20,11 @@
         </activity>
         <activity android:name=".activities.StudentListActivity" />
         <activity android:name=".activities.StudentActivity" />
-        <activity android:name=".activities.UploadActivity"></activity>
+        <activity android:name=".activities.UploadActivity" />
+        <activity
+            android:name=".activities.ListClassActivity"
+            android:label="@string/title_activity_list_class"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

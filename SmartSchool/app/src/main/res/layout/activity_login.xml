@@ -4,15 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="16dp"
     tools:context="com.example.quanla.smartschool.activities.LoginActivity">
 
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="200dp"
+        android:layout_height="150dp" />
     <ScrollView
         android:id="@+id/sv1"
+        android:layout_below="@id/view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true">
+        android:layout_height="wrap_content">
+
         <android.support.design.widget.TextInputLayout
-            android:layout_centerInParent="true"
             android:id="@+id/til_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -21,7 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:hint="username"
+                android:hint="@string/username"
                 android:textSize="16dp"
                 android:imeOptions="actionNext"
                 />
@@ -34,11 +40,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/sv1">
+
         <EditText
             android:id="@+id/edt_password"
             android:inputType="textPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/password"
             android:textSize="16dp"
             android:imeOptions="actionDone"/>
     </android.support.design.widget.TextInputLayout>
@@ -47,23 +55,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/til_password"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="16dp">
         <Button
             android:id="@+id/btn_login"
             android:layout_weight="1"
             android:layout_width="0dp"
+            android:layout_margin="16dp"
             android:layout_height="wrap_content"
-            android:text="Login"/>
+            android:text="@string/login"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/shape_button" />
 
         <Button
             android:id="@+id/btn_register"
             android:layout_weight="1"
             android:layout_width="0dp"
+            android:layout_margin="16dp"
             android:layout_height="wrap_content"
-            android:text="Register"
-            />
+            android:text="@string/register"
+            android:background="@drawable/shape_button_register" />
     </LinearLayout>
-
-
 
 </RelativeLayout>

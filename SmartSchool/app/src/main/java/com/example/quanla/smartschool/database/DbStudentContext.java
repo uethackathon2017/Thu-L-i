@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.example.quanla.smartschool.database.model.Student;
 import com.example.quanla.smartschool.database.model.StudentRespon;
+import com.example.quanla.smartschool.eventbus.GetDataFaildedEvent;
+import com.example.quanla.smartschool.eventbus.GetDataSuccusEvent;
 import com.example.quanla.smartschool.networks.NetContextMicrosoft;
 import com.example.quanla.smartschool.networks.services.StudentService;
 
@@ -21,9 +23,9 @@ import retrofit2.Response;
  */
 
 public class DbStudentContext {
-    private final String TAG = DbStudentContext.class.toString();
-    public static final DbStudentContext instance = new DbStudentContext();
 
+    public static DbStudentContext instance=new DbStudentContext();
+    private final String TAG = DbStudentContext.class.toString();
     private List<Student> students;
     private List<StudentRespon> studentRespon;
     private String idGroup;
@@ -34,6 +36,8 @@ public class DbStudentContext {
 
     public void setIdGroup(String idGroup) {
         this.idGroup = idGroup;
+        Log.e(TAG, String.format("setIdGroup: %s", idGroup) );
+        getAllStudentInGroup();
     }
 
     private DbStudentContext() {
@@ -64,16 +68,18 @@ public class DbStudentContext {
                 for (int i = 0; i < studentRespon.size(); i++) {
                     students.add(new Student(studentRespon.get(i)));
                 }
-//                EventBus.getDefault().postSticky(students);
+                for (int i = 0; i < students.size(); i++) {
+                    Log.e(TAG, String.format("onResponse: %s", students.get(i).toString()) );
+                }
+               EventBus.getDefault().postSticky(new GetDataSuccusEvent());
                 Log.e(TAG, "onResponse: Thành");
 
             }
 
             @Override
             public void onFailure(Call<List<StudentRespon>> call, Throwable t) {
-//                EventBus.getDefault().post(new GetDataFaildedEvent());
+                EventBus.getDefault().postSticky(new GetDataFaildedEvent());
                 ;
-                Log.e(TAG, "onFailure: cc" );
             }
         });
     }

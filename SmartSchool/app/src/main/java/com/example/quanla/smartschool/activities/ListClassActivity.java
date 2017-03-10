@@ -1,106 +1,105 @@
 package com.example.quanla.smartschool.activities;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Intent;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.Toast;
 
 import com.example.quanla.smartschool.R;
 import com.example.quanla.smartschool.adapter.ClassListAdapter;
-import com.example.quanla.smartschool.adapter.StudentListAdapter;
 import com.example.quanla.smartschool.database.DbClassContext;
-import com.example.quanla.smartschool.evenbus.GetDataSuccusEvent;
-import com.example.quanla.smartschool.evenbus.GotoStudentListActivity;
-import com.example.quanla.smartschool.fragment.ListClassFragment;
-import com.example.quanla.smartschool.fragment.SceneFragment;
+import com.example.quanla.smartschool.eventbus.GetDataFaildedEvent;
+import com.example.quanla.smartschool.eventbus.GetDataSuccusEvent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static java.security.AccessController.getContext;
+
 public class ListClassActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    ActionBarDrawerToggle toggle;
 
-
-    private static final String TAG = ListClassActivity.class.toString();
+    @BindView(R.id.rv_class_list)
+    RecyclerView rvClassList;
+    ClassListAdapter classListAdapter = new ClassListAdapter(this);
+    ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_class);
         EventBus.getDefault().register(this);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        toggle = new ActionBarDrawerToggle(
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                if(getSupportFragmentManager().getBackStackEntryCount() > 0){
-                    toggle.setDrawerIndicatorEnabled(false);
-                    toggle.setHomeAsUpIndicator(R.drawable.ic_keyboard_backspace_white_24px);
-                    toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            onBackPressed();
-                        }
-                    });
-                }
-                else{
-                    toggle.setDrawerIndicatorEnabled(true);
-                    toggle.setToolbarNavigationClickListener(null);
-                }
-            }
-        });
-
-
-        DbClassContext.instance.getAllGroup();
-
+        ButterKnife.bind(this);
+        setupUI();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        SceneFragment sceneFragment = new SceneFragment(this.getSupportFragmentManager(),R.id.fl_main);
-        sceneFragment.replaceFragment(new ListClassFragment(),false);
+    }
 
-        ButterKnife.bind(this);
+    public void setupUI()
+    {
+        progress = ProgressDialog.show(this, "Loading",
+                "Please waiting...", true);
+        if (DbClassContext.instance.getStudents()!=null){
+            progress.dismiss();
+            //classListAdapter = new ClassListAdapter(this);
+            DbClassContext.instance.getAllGroup();
+            rvClassList.setAdapter(new ClassListAdapter(this));
+            rvClassList.setLayoutManager(new LinearLayoutManager(this));
+            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+            rvClassList.addItemDecoration(dividerItemDecoration);
+        }else {
+            progress.show();
+        }
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
-
-    @Subscribe
-    public void gotoStudentList(GotoStudentListActivity gotoStudentListActivity) {
-        Intent intent = new Intent(this, StudentListActivity.class);
-        startActivity(intent);
+    @Subscribe(sticky = true ,threadMode = ThreadMode.MAIN)
+    public void getDataSuccus(GetDataSuccusEvent event) {
+        progress.dismiss();
+        rvClassList.setAdapter(new ClassListAdapter(this));
+        rvClassList.setLayoutManager(new LinearLayoutManager(this));
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        rvClassList.addItemDecoration(dividerItemDecoration);
+        Toast.makeText(this, "Load completed", Toast.LENGTH_SHORT).show();
+        EventBus.getDefault().removeStickyEvent(GetDataSuccusEvent.class);
     }
 
-    @Subscribe
-    public void onLoadDataconplete(GetDataSuccusEvent event){
-        ClassListAdapter classListAdapter=new ClassListAdapter(this);
-
-
+    public void getDataFailed(GetDataFaildedEvent event) {
+        progress.dismiss();
+        Toast.makeText(this, "Load failed", Toast.LENGTH_SHORT).show();
+        EventBus.getDefault().removeStickyEvent(GetDataFaildedEvent.class);
     }
+
 
 
     @Override
@@ -113,12 +112,12 @@ public class ListClassActivity extends AppCompatActivity
         }
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.list_class, menu);
-//        return true;
-//    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.list_class, menu);
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

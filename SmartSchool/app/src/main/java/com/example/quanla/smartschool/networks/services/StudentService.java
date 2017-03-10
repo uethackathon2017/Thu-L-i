@@ -19,12 +19,12 @@ import retrofit2.http.Path;
  */
 
 public interface StudentService {
-    @POST("{personGroupId}/persons")
+    @POST("persongroups/{personGroupId}/persons")
     Call<PersionId> createPersion(@Path("personGroupId") String personGroupId, Student student);
 
-    @POST("{personGroupId}/persons/{personId}/persistedFaces")
+    @POST("persongroups/{personGroupId}/persons/{personId}/persistedFaces")
     Call<PersionFaceId> addPersionFace(@Path("personGroupId") String personGroupId, @Path("personId") String personId, @Body UrlImage url);
 
-    @GET("{personGroupId}/persons")
+    @GET("persongroups/{personGroupId}/persons")
     Call<List<StudentRespon>> getAllPersonInGroup(@Path("personGroupId") String personGroupId);
 }

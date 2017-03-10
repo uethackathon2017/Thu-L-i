@@ -1,5 +1,6 @@
 package com.example.quanla.smartschool.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -51,7 +52,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        DbClassContext.instance.getAllGroup();
         setupUI();
         addListener();
     }
@@ -75,6 +75,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void sendLogin(String username, String password){
+        final ProgressDialog progress = ProgressDialog.show(this, "Loading",
+                "Please waiting...", true);
+
         UserService service = NetContextLogin.instance.create(UserService.class);
 
         MediaType jsonType = MediaType.parse("application/json");
@@ -90,12 +93,14 @@ public class LoginActivity extends AppCompatActivity {
                     token = responseBody.get_id().get$oid();
                     Log.d(TAG, String.format("token: %s", token));
                     onLoginSuccess();
+                    progress.dismiss();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Toast.makeText(LoginActivity.this, "No internet", Toast.LENGTH_SHORT).show();
+                progress.dismiss();
             }
         });
     }
