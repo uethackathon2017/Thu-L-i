@@ -94,6 +94,7 @@ public class ListClassActivity extends AppCompatActivity
         Intent intent = new Intent(this, StudentListActivity.class);
         startActivity(intent);
     }
+
     @Subscribe
     public void onLoadDataconplete(GetDataSuccusEvent event){
         ClassListAdapter classListAdapter=new ClassListAdapter(this);
