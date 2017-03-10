@@ -21,7 +21,6 @@ import retrofit2.Response;
  */
 
 public class DbStudentContext {
-
     private final String TAG = DbStudentContext.class.toString();
     private List<Student> students;
     private List<StudentRespon> studentRespon;
@@ -72,6 +71,7 @@ public class DbStudentContext {
             public void onFailure(Call<List<StudentRespon>> call, Throwable t) {
 //                EventBus.getDefault().post(new GetDataFaildedEvent());
                 ;
+                Log.e(TAG, "onFailure: cc" );
             }
         });
     }
