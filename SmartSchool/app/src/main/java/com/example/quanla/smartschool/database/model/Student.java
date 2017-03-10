@@ -18,6 +18,11 @@ public class Student {
     @SerializedName("userData")
     private String userData;
     private String idStudent;
+
+    public String getUrl() {
+        return url;
+    }
+
     private String url;
 
 

@@ -30,6 +30,7 @@ dependencies {
     compile 'com.google.firebase:firebase-core:10.2.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'org.greenrobot:eventbus:3.0.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.balysv.materialmenu:material-menu-abc:1.5.5'
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile 'com.android.support:design:25.2.0'
