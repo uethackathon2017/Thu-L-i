@@ -50,7 +50,6 @@ public class NetContextMicrosoft {
 
             @Override
             public Response intercept(Chain chain) throws IOException {
-
                 Request request = chain.request()
                         .newBuilder()
                         .addHeader("Content-Type", "application/json")

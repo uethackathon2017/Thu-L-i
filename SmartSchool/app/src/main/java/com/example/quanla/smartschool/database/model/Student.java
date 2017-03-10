@@ -1,6 +1,10 @@
 package com.example.quanla.smartschool.database.model;
 
+import android.util.Log;
+
 import com.google.gson.annotations.SerializedName;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by tranh on 3/11/2017.
@@ -16,6 +20,8 @@ public class Student {
     private String idStudent;
     private String url;
 
+
+
     @Override
     public String toString() {
         return "Student{" +
@@ -24,6 +30,15 @@ public class Student {
                 ", idStudent='" + idStudent + '\'' +
                 ", url='" + url + '\'' +
                 '}';
+    }
+    public Student(StudentRespon studentRespon){
+        this.name = studentRespon.getName();
+        this.userData = studentRespon.getUserdata();
+        this.personid=studentRespon.getPersonid();
+        String[] strings = userData.split(" ");
+        Log.e(TAG, String.format("Student: %s", userData) );
+        this.idStudent = strings[0];
+        this.url=strings[1];
     }
 
     // Hàm này service trả về

@@ -24,5 +24,4 @@ public interface FaceService {
     Call<List<IndentifyRespon>> identifyFace(@Body IndentifyBody indentifyBody);
     @POST("verify")
     Call<VerifyRespon> verifyFace(@Body VerifyBody verifyBody);
-
 }
