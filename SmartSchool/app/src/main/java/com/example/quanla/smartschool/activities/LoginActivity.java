@@ -11,13 +11,18 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.quanla.smartschool.R;
+import com.example.quanla.smartschool.database.model.ClassStudent;
 import com.example.quanla.smartschool.networks.NetContextLogin;
+import com.example.quanla.smartschool.networks.NetContextMicrosoft;
 import com.example.quanla.smartschool.networks.jsonModels.JsonBody;
 import com.example.quanla.smartschool.networks.jsonModels.ResponseBody;
-import com.example.quanla.smartschool.networks.services.Service;
+import com.example.quanla.smartschool.networks.services.ClassService;
+import com.example.quanla.smartschool.networks.services.UserService;
 import com.example.quanla.smartschool.sharePrefs.LoginCredentials;
 import com.example.quanla.smartschool.sharePrefs.SharedPrefs;
 import com.google.gson.Gson;
+
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -68,7 +73,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void sendLogin(String username, String password){
-        Service service = NetContextLogin.instance.create(Service.class);
+        UserService service = NetContextLogin.instance.create(UserService.class);
 
         MediaType jsonType = MediaType.parse("application/json");
         String loginJson = (new Gson()).toJson(new JsonBody(username, password));
@@ -105,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void sendRegister(String username, String password){
-        Service service = NetContextLogin.instance.create(Service.class);
+        UserService service = NetContextLogin.instance.create(UserService.class);
 
         MediaType jsonType = MediaType.parse("application/json");
         String registerJson = (new Gson()).toJson(new JsonBody(username, password));

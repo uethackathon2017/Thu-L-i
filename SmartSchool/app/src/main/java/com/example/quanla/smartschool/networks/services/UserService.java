@@ -11,7 +11,7 @@ import retrofit2.http.POST;
  * Created by QuanLA on 3/10/2017.
  */
 
-public interface Service {
+public interface UserService {
     @POST("login")
     Call<ResponseBody> login(@Body RequestBody requestBody);
 
