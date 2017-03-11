@@ -35,6 +35,7 @@ import com.example.quanla.smartschool.database.model.Student;
 import com.example.quanla.smartschool.database.request.UrlImage;
 import com.example.quanla.smartschool.database.respon.FaceId;
 import com.example.quanla.smartschool.database.respon.IndentifyRespon;
+import com.example.quanla.smartschool.database.respon.PersionId;
 import com.example.quanla.smartschool.eventbus.GetFaceIdSuccusEvent;
 import com.example.quanla.smartschool.eventbus.IdentifySuccusEvent;
 import com.example.quanla.smartschool.eventbus.UploadImageSuccusEvent;
@@ -72,8 +73,6 @@ public class UploadActivity extends AppCompatActivity {
     Button btCapture;
     @BindView(R.id.btn_fromLocal)
     Button btFromLocal;
-    @BindView(R.id.img_photo)
-    ImageView ivPhoto;
     Map uploadResult;
     ProgressDialog progress;
 
@@ -112,8 +111,6 @@ public class UploadActivity extends AppCompatActivity {
             int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
             path = cursor.getString(columnIndex);
             cursor.close();
-            Bitmap bmp = BitmapFactory.decodeFile(path);
-            ivPhoto.setImageBitmap(bmp);
         } else if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             path = "sdcard/camera_app/cam_image.jpg";
             Log.e(TAG, String.format("onActivityResult: %s", (new File(path)).getTotalSpace()));
@@ -122,7 +119,7 @@ public class UploadActivity extends AppCompatActivity {
             Retrievedata retrievedata = new Retrievedata();
             retrievedata.execute(path);
         }
-        if (resultCode!=RESULT_CANCELED){
+        if (resultCode != RESULT_CANCELED) {
             progress = ProgressDialog.show(this, "Đang tải",
                     "Đang upload ảnh...", true);
         }
@@ -149,19 +146,30 @@ public class UploadActivity extends AppCompatActivity {
             }
         });
     }
-    @Subscribe
-    public void onIndentifyPerson(IdentifySuccusEvent event){
-        List<IndentifyRespon> indentifyRespons = event.getIndentifyRespons();
-        List<Student> students=new Vector<>();
-        for (int i = 0; i < indentifyRespons.size(); i++) {
-            Student student=DbStudentContext.instance.findStudent(indentifyRespons.get(i).getCandidates().get(0).getPersonid());
-            //get 0 lay ng trung khop nhat
-            students.add(student);
-        }
-        for (int i = 0; i < students.size(); i++) {
 
-            Log.e(TAG, String.format("onIndentifyPerson: Phát hiện ra: %s",students.get(i).toString() ) );
+    @Subscribe
+    public void onIndentifyPerson(IdentifySuccusEvent event) {
+        List<IndentifyRespon> indentifyRespons = event.getIndentifyRespons();
+        List<Student> students = new Vector<>();
+        if (indentifyRespons != null) {
+            for (int i = 0; i < indentifyRespons.size(); i++) {
+                List<PersionId> persionIds=indentifyRespons.get(i).getPersonsList();
+                for (int j = 0; j < persionIds.size(); j++) {
+                    Student student = DbStudentContext.instance.findStudent(persionIds.get(j).getPersonid());
+                    if (student!=null) {
+                        Log.e(TAG, String.format("onIndentifyPerson: %s", indentifyRespons.get(i).getCandidates().get(0).getConfidence()) );
+                        students.add(student);
+                    }
+                }
+
+            }
+            for (int i = 0; i < students.size(); i++) {
+
+                Log.e(TAG, String.format("onIndentifyPerson: Phát hiện ra: %s", students.get(i).toString()));
+
+            }
         }
+        path=null;
     }
 
     private void doAction() {
@@ -232,27 +240,27 @@ public class UploadActivity extends AppCompatActivity {
             }
         });
     }
+
     @Subscribe
     public void identifyFace(final GetFaceIdSuccusEvent event) {
-        // nhieu nguoi nhan dien bo get 0;
-        Log.e(TAG, "identifyFace: Vào xác minh người " );
-        List<String> strings=new Vector<>();
+        Log.e(TAG, "identifyFace: Vào xác minh người ");
+        List<String> strings = new Vector<>();
         for (int i = 0; i < event.getFaceIds().size(); i++) {
             strings.add(event.getFaceIds().get(i).getFaceid());
         }
         FaceService faceService = NetContextMicrosoft.instance.create(FaceService.class);
-        final IndentifyBody indentifyBody=new IndentifyBody(DbStudentContext.instance.getIdGroup(), strings);
+        final IndentifyBody indentifyBody = new IndentifyBody(DbStudentContext.instance.getIdGroup(), strings);
         faceService.identifyFace(indentifyBody).enqueue(new Callback<List<IndentifyRespon>>() {
             @Override
             public void onResponse(Call<List<IndentifyRespon>> call, Response<List<IndentifyRespon>> response) {
-                List<IndentifyRespon>  responList=response.body();
+                List<IndentifyRespon> responList = response.body();
                 EventBus.getDefault().post(new IdentifySuccusEvent(responList));
                 progress.dismiss();
             }
 
             @Override
             public void onFailure(Call<List<IndentifyRespon>> call, Throwable t) {
-
+                Toast.makeText(UploadActivity.this, "Lỗi mạng :((", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -17,7 +17,7 @@ public class IndentifyBody {
         this.persongroupid = persongroupid;
         this.faceids = faceids;
         this.maxnumofcandidatesreturned = 1;
-        this.confidencethreshold = 0.45;
+        this.confidencethreshold = 0.52;
     }
 
     public String getPersongroupid() {
