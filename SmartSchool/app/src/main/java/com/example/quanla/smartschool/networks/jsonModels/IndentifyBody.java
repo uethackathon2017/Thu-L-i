@@ -1,5 +1,6 @@
 package com.example.quanla.smartschool.networks.jsonModels;
 
+import com.example.quanla.smartschool.database.respon.FaceId;
 import com.example.quanla.smartschool.database.respon.PersionFaceId;
 import com.google.gson.annotations.SerializedName;
 
@@ -14,15 +15,15 @@ public class IndentifyBody {
     @SerializedName("personGroupId")
     public String persongroupid;
     @SerializedName("faceIds")
-    public PersionFaceId faceid;
+    public FaceId faceid;
     @SerializedName("maxNumOfCandidatesReturned")
     public int maxnumofcandidatesreturned;
     @SerializedName("confidenceThreshold")
     public double confidencethreshold;
 
-    public IndentifyBody(String persongroupid, PersionFaceId faceids) {
+    public IndentifyBody(String persongroupid, FaceId faceid) {
         this.persongroupid = persongroupid;
-        this.faceid = faceids;
+        this.faceid = faceid;
         maxnumofcandidatesreturned=1;
         confidencethreshold=0.5;
     }
@@ -31,9 +32,6 @@ public class IndentifyBody {
         this.persongroupid = persongroupid;
     }
 
-    public void setFaceid(PersionFaceId faceid) {
-        this.faceid = faceid;
-    }
 
     public void setMaxnumofcandidatesreturned(int maxnumofcandidatesreturned) {
         this.maxnumofcandidatesreturned = maxnumofcandidatesreturned;

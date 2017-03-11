@@ -34,6 +34,22 @@ public class IndentifyRespon {
             this.personid = personid;
             this.confidence = confidence;
         }
+
+        @Override
+        public String toString() {
+            return "Candidates{" +
+                    "personid='" + personid + '\'' +
+                    ", confidence=" + confidence +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "IndentifyRespon{" +
+                "faceid='" + faceid + '\'' +
+                ", candidates=" + candidates +
+                '}';
     }
 
     public String getFaceid() {
