@@ -1,15 +1,20 @@
 package com.example.quanla.smartschool.activities;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import com.example.quanla.smartschool.R;
 import com.example.quanla.smartschool.adapter.StudentListAdapter;
+import com.example.quanla.smartschool.eventbus.GetDataFaildedEvent;
 import com.example.quanla.smartschool.eventbus.GetDataSuccusEvent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -24,6 +29,8 @@ public class StudentListActivity extends AppCompatActivity {
     ProgressDialog progress;
     @BindView(R.id.rv_list)
     RecyclerView rv_list;
+    @BindView(R.id.fab_check)
+    FloatingActionButton fab;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +40,19 @@ public class StudentListActivity extends AppCompatActivity {
         progress = ProgressDialog.show(this, "Loading",
                 "Please waiting...", true);
         progress.show();
+        addListener();
     }
+
+    private void addListener() {
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(StudentListActivity.this,UploadActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
     @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
     public void onDataLoadComplete(GetDataSuccusEvent event){
         progress.dismiss();
@@ -44,7 +63,14 @@ public class StudentListActivity extends AppCompatActivity {
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         rv_list.addItemDecoration(dividerItemDecoration);
         Log.e(TAG, String.format("onDataLoadComplete: dsadksa") );
+        EventBus.getDefault().removeStickyEvent(GetDataSuccusEvent.class);
 
+    }
+    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
+    public void getDataFail(GetDataFaildedEvent event){
+        progress.dismiss();
+        EventBus.getDefault().removeStickyEvent(GetDataFaildedEvent.class);
+        Toast.makeText(this, "No internet", Toast.LENGTH_SHORT).show();
     }
 
 
