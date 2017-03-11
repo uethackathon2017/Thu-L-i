@@ -1,7 +1,5 @@
 package com.example.quanla.smartschool.networks.jsonModels;
 
-import com.example.quanla.smartschool.database.respon.FaceId;
-import com.example.quanla.smartschool.database.respon.PersionFaceId;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
@@ -14,30 +12,35 @@ public class IndentifyBody {
 
     @SerializedName("personGroupId")
     public String persongroupid;
+
+    public IndentifyBody(String persongroupid, List<String> faceids) {
+        this.persongroupid = persongroupid;
+        this.faceids = faceids;
+        this.maxnumofcandidatesreturned = 1;
+        this.confidencethreshold = 0.45;
+    }
+
+    public String getPersongroupid() {
+
+        return persongroupid;
+    }
+
+    public List<String> getFaceids() {
+        return faceids;
+    }
+
+    public int getMaxnumofcandidatesreturned() {
+        return maxnumofcandidatesreturned;
+    }
+
+    public double getConfidencethreshold() {
+        return confidencethreshold;
+    }
+
     @SerializedName("faceIds")
-    public FaceId faceid;
+    public List<String> faceids;
     @SerializedName("maxNumOfCandidatesReturned")
     public int maxnumofcandidatesreturned;
     @SerializedName("confidenceThreshold")
     public double confidencethreshold;
-
-    public IndentifyBody(String persongroupid, FaceId faceid) {
-        this.persongroupid = persongroupid;
-        this.faceid = faceid;
-        maxnumofcandidatesreturned=1;
-        confidencethreshold=0.5;
-    }
-
-    public void setPersongroupid(String persongroupid) {
-        this.persongroupid = persongroupid;
-    }
-
-
-    public void setMaxnumofcandidatesreturned(int maxnumofcandidatesreturned) {
-        this.maxnumofcandidatesreturned = maxnumofcandidatesreturned;
-    }
-
-    public void setConfidencethreshold(double confidencethreshold) {
-        this.confidencethreshold = confidencethreshold;
-    }
 }

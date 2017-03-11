@@ -27,4 +27,6 @@ public interface StudentService {
 
     @GET("persongroups/{personGroupId}/persons")
     Call<List<StudentRespon>> getAllPersonInGroup(@Path("personGroupId") String personGroupId);
+    @GET("persongroups/{personGroupId}/persons/{personId}")
+    Call<StudentRespon> getStudent(@Path("personGroupId")String personGroupId,@Path("personId")PersionId persionId);
 }

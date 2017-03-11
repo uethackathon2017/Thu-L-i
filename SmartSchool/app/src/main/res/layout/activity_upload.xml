@@ -4,28 +4,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/uploadbackground"
+    android:padding="16dp"
     tools:context="com.example.quanla.smartschool.activities.UploadActivity">
+
+
+
+
+    <Button
+        android:layout_margin="5dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/shape_button"
+        android:id="@+id/btn_fromLocal"
+        android:text="Load from local data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_margin="5dp"
+        android:layout_above="@id/btn_fromLocal"
+        android:id="@+id/btn_capture"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="400dp"
+        android:text="Capture new photo"
+        android:background="@drawable/shape_button_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
 
     <ImageView
         android:layout_alignParentTop="true"
         android:id="@+id/img_photo"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:scaleType="fitCenter" />
-
-    <Button
-        android:id="@+id/btn_capture"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="400dp"
-        android:text="Capture new photo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/btn_fromLocal"
-        android:text="Load from local data"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 </RelativeLayout>

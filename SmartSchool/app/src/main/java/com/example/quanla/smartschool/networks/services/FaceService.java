@@ -19,7 +19,7 @@ import retrofit2.http.POST;
 
 public interface FaceService {
     @POST("detect")
-    Call<FaceId> detectFace(@Body UrlImage url);
+    Call<List<FaceId>> detectFace(@Body UrlImage url);
     @POST("identify")
     Call<List<IndentifyRespon>> identifyFace(@Body IndentifyBody indentifyBody);
     @POST("verify")

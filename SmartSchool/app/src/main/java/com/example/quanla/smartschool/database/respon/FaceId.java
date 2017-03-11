@@ -19,4 +19,11 @@ public class FaceId {
 
         this.faceid = faceid;
     }
+
+    @Override
+    public String toString() {
+        return "FaceId{" +
+                "faceid='" + faceid + '\'' +
+                '}';
+    }
 }

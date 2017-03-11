@@ -19,4 +19,11 @@ public class PersionId {
 
         this.personid = personid;
     }
+
+    @Override
+    public String toString() {
+        return "PersionId{" +
+                "personid='" + personid + '\'' +
+                '}';
+    }
 }

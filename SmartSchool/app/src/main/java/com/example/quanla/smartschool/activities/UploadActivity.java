@@ -1,14 +1,21 @@
 package com.example.quanla.smartschool.activities;
 
+import android.Manifest;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.speech.tts.TextToSpeech;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,28 +24,41 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.quanla.smartschool.R;
+import com.example.quanla.smartschool.database.DbClassContext;
+import com.example.quanla.smartschool.database.DbStudentContext;
+import com.example.quanla.smartschool.database.model.Student;
 import com.example.quanla.smartschool.database.request.UrlImage;
 import com.example.quanla.smartschool.database.respon.FaceId;
 import com.example.quanla.smartschool.database.respon.IndentifyRespon;
+import com.example.quanla.smartschool.eventbus.GetFaceIdSuccusEvent;
+import com.example.quanla.smartschool.eventbus.IdentifySuccusEvent;
+import com.example.quanla.smartschool.eventbus.UploadImageSuccusEvent;
 import com.example.quanla.smartschool.networks.NetContextMicrosoft;
 import com.example.quanla.smartschool.networks.jsonModels.IndentifyBody;
 import com.example.quanla.smartschool.networks.services.FaceService;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import java.beans.IndexedPropertyChangeEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -55,18 +75,32 @@ public class UploadActivity extends AppCompatActivity {
     @BindView(R.id.img_photo)
     ImageView ivPhoto;
     Map uploadResult;
+    ProgressDialog progress;
 
     private static final int GALLERY_REQUEST = 1;
     private static final int REQUEST_TAKE_PHOTO = 2;
+    private static final int PERMISSION_ALL = 3;
+
+    String path;
+    private String[] PERMISSIONS = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload);
+        EventBus.getDefault().register(this);
         ButterKnife.bind(this);
         addListener();
     }
-    String path;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == GALLERY_REQUEST && resultCode == RESULT_OK && data != null) {
@@ -80,14 +114,17 @@ public class UploadActivity extends AppCompatActivity {
             cursor.close();
             Bitmap bmp = BitmapFactory.decodeFile(path);
             ivPhoto.setImageBitmap(bmp);
-        }else if (requestCode==REQUEST_TAKE_PHOTO&&resultCode==RESULT_OK){
-             path="sdcard/camera_app/cam_image.jpg";
-            Log.e(TAG, String.format("onActivityResult: %s", (new File(path)).getTotalSpace()) );
-            ivPhoto.setImageDrawable(Drawable.createFromPath(path));
+        } else if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            path = "sdcard/camera_app/cam_image.jpg";
+            Log.e(TAG, String.format("onActivityResult: %s", (new File(path)).getTotalSpace()));
         }
-        if(path!=null) {
+        if (path != null) {
             Retrievedata retrievedata = new Retrievedata();
             retrievedata.execute(path);
+        }
+        if (resultCode!=RESULT_CANCELED){
+            progress = ProgressDialog.show(this, "Đang tải",
+                    "Đang upload ảnh...", true);
         }
     }
 
@@ -104,23 +141,48 @@ public class UploadActivity extends AppCompatActivity {
         btCapture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                File file = getFile();
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-                startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+                intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                Log.d(TAG, "1");
+                doAction();
+
+
             }
         });
     }
-    public void getUrlImage(File file){
-        Cloudinary cloudinary = new Cloudinary(
-                ObjectUtils.asMap(
-                        "cloud_name", "dhtl",
-                        "api_key", "767781774363334",
-                        "api_secret", "AC5_uhn8LY2JaiWPeONIhz6ZLPg")
-        );
-        String s=cloudinary.url().imageTag(file.getName());
-        Log.e(TAG, String.format("getUrlImage: %s", s) );
+    @Subscribe
+    public void onIndentifyPerson(IdentifySuccusEvent event){
+        List<IndentifyRespon> indentifyRespons = event.getIndentifyRespons();
+        List<Student> students=new Vector<>();
+        for (int i = 0; i < indentifyRespons.size(); i++) {
+            Student student=DbStudentContext.instance.findStudent(indentifyRespons.get(i).getCandidates().get(0).getPersonid());
+            //get 0 lay ng trung khop nhat
+            students.add(student);
+        }
+        for (int i = 0; i < students.size(); i++) {
+
+            Log.e(TAG, String.format("onIndentifyPerson: Phát hiện ra:",students.get(i).toString() ) );
+        }
     }
+
+    private void doAction() {
+        if (!hasPermissions(this, PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+            Log.d(TAG, "3");
+            try {
+                File file = getFile();
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+                startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+                Log.d(TAG, "2");
+            } catch (Exception e) {
+
+            }
+        } else {
+            File file = getFile();
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+            startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+        }
+    }
+
 
     private File getFile() {
         File foder = new File("sdcard/camera_app");
@@ -138,33 +200,54 @@ public class UploadActivity extends AppCompatActivity {
                         "api_key", "767781774363334",
                         "api_secret", "AC5_uhn8LY2JaiWPeONIhz6ZLPg")
         );
-         uploadResult = null;
+        uploadResult = null;
         try {
             uploadResult = cloudinary.uploader().upload(file, ObjectUtils.emptyMap());
-            String url= (String) uploadResult.get("url");
-            UrlImage urlImage=new UrlImage(url);
-            FaceService faceService= NetContextMicrosoft.instance.create(FaceService.class);
-            faceService.detectFace(urlImage).enqueue(new Callback<FaceId>() {
-                @Override
-                public void onResponse(Call<FaceId> call, Response<FaceId> response) {
-                    identifyFace("1",response.body());
-                }
-
-                @Override
-                public void onFailure(Call<FaceId> call, Throwable t) {
-
-                }
-            });
+            String url = (String) uploadResult.get("url");
+            UrlImage urlImage = new UrlImage(url);
+            Log.e(TAG, String.format("setBtSummit: %s", url));
+            EventBus.getDefault().post(new UploadImageSuccusEvent(url));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    public void identifyFace(String idGroup,FaceId faceId){
-        FaceService faceService=NetContextMicrosoft.instance.create(FaceService.class);
-        faceService.identifyFace(new IndentifyBody(idGroup,faceId)).enqueue(new Callback<List<IndentifyRespon>>() {
+
+    @Subscribe
+    public void onUploadImageSuccus(UploadImageSuccusEvent event) {
+        Log.e(TAG, "onUploadImageSuccus: vào event");
+        FaceService faceService = NetContextMicrosoft.instance.create(FaceService.class);
+        faceService.detectFace(new UrlImage(event.getUrl())).enqueue(new Callback<List<FaceId>>() {
+            @Override
+            public void onResponse(Call<List<FaceId>> call, Response<List<FaceId>> response) {
+                List<FaceId> faceIds = response.body();
+                Log.e(TAG, String.format("onResponse: ffffff %s", faceIds.get(0).getFaceid()));
+                EventBus.getDefault().post(new GetFaceIdSuccusEvent(faceIds));
+            }
+
+            @Override
+            public void onFailure(Call<List<FaceId>> call, Throwable t) {
+                Log.e(TAG, String.format("onFailure: upload %s", t.toString()));
+                progress.dismiss();
+                Toast.makeText(UploadActivity.this, "Có lỗi xảy ra, thử lại sau", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    @Subscribe
+    public void identifyFace(final GetFaceIdSuccusEvent event) {
+        // nhieu nguoi nhan dien bo get 0;
+        Log.e(TAG, "identifyFace: Vào xác minh người " );
+        List<String> strings=new Vector<>();
+        for (int i = 0; i < event.getFaceIds().size(); i++) {
+            strings.add(event.getFaceIds().get(i).getFaceid());
+        }
+        FaceService faceService = NetContextMicrosoft.instance.create(FaceService.class);
+        final IndentifyBody indentifyBody=new IndentifyBody(DbStudentContext.instance.getIdGroup(), strings);
+        faceService.identifyFace(indentifyBody).enqueue(new Callback<List<IndentifyRespon>>() {
             @Override
             public void onResponse(Call<List<IndentifyRespon>> call, Response<List<IndentifyRespon>> response) {
-                Log.e(TAG, String.format("onResponse: %s", response.body().toString()) );
+                List<IndentifyRespon>  responList=response.body();
+                EventBus.getDefault().post(new IdentifySuccusEvent(responList));
+                progress.dismiss();
             }
 
             @Override
@@ -178,14 +261,35 @@ public class UploadActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
             setBtSummit(new File(params[0]));
-            getUrlImage(new File(path));
             return null;
         }
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.check_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.menu.check_menu) {
+            Retrievedata retrievedata = new Retrievedata();
+            retrievedata.execute(path);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
 
+    }
+
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

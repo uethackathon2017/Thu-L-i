@@ -92,5 +92,13 @@ public class DbStudentContext {
             }
         });
     }
+    public Student findStudent(String personId){
+        for (int i = 0; i < students.size(); i++) {
+            if (students.get(i).getPersonid().equals(personId)){
+                return students.get(i);
+            }
+        }
+        return null;
+    }
 
 }
