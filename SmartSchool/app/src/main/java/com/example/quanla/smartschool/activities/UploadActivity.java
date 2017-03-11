@@ -160,7 +160,7 @@ public class UploadActivity extends AppCompatActivity {
         }
         for (int i = 0; i < students.size(); i++) {
 
-            Log.e(TAG, String.format("onIndentifyPerson: Phát hiện ra:",students.get(i).toString() ) );
+            Log.e(TAG, String.format("onIndentifyPerson: Phát hiện ra: %s",students.get(i).toString() ) );
         }
     }
 
