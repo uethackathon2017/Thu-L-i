@@ -52,6 +52,7 @@ public class ClassListAdapter extends RecyclerView.Adapter<ClassListHodler> {
             @Override
             public void onClick(View v) {
                 DbStudentContext.instance.setIdGroup(classStudent.getPersongroupid());
+                DbStudentContext.instance.setNameGroup(classStudent.getName());
                 Intent intent=new Intent(context,StudentListActivity.class);
                 context.startActivity(intent);
             }

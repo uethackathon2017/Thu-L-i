@@ -9,23 +9,37 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import com.example.quanla.smartschool.R;
 import com.example.quanla.smartschool.adapter.StudentListAdapter;
+import com.example.quanla.smartschool.database.DbStudentContext;
+import com.example.quanla.smartschool.database.model.Checkin;
+import com.example.quanla.smartschool.database.model.StudentIdCheckIn;
 import com.example.quanla.smartschool.eventbus.GetDataFaildedEvent;
 import com.example.quanla.smartschool.eventbus.GetDataSuccusEvent;
+import com.example.quanla.smartschool.networks.NetContextLogin;
+import com.example.quanla.smartschool.networks.services.CheckinService;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.List;
+import java.util.Vector;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class StudentListActivity extends AppCompatActivity {
     private static final String TAG = StudentListActivity.class.toString();
+    public static List<StudentIdCheckIn> studentids=new Vector<>();
     ProgressDialog progress;
     @BindView(R.id.rv_list)
     RecyclerView rv_list;
@@ -51,6 +65,38 @@ public class StudentListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.check_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId()==R.id.action_add){
+            if (studentids.size()!=0) {
+                final Checkin checkin = new Checkin(DbStudentContext.instance.getNameGroup(), studentids);
+                CheckinService netContextLogin=NetContextLogin.instance.create(CheckinService.class);
+                netContextLogin.addNewCheckin(checkin).enqueue(new Callback<Checkin>() {
+                    @Override
+                    public void onResponse(Call<Checkin> call, Response<Checkin> response) {
+                        Log.e(TAG, String.format("onResponse: %s", response.body().toString()) );
+                        Toast.makeText(StudentListActivity.this, "Thanh cong", Toast.LENGTH_SHORT).show();
+                        studentids.clear();
+                    }
+
+                    @Override
+                    public void onFailure(Call<Checkin> call, Throwable t) {
+                        Log.e(TAG, "onFailure: That bai" );
+                    }
+                });
+            }
+
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)

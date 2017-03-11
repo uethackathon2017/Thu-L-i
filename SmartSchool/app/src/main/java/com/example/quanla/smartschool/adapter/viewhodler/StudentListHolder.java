@@ -10,11 +10,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.Checkable;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.quanla.smartschool.R;
+import com.example.quanla.smartschool.activities.StudentListActivity;
 import com.example.quanla.smartschool.database.model.Student;
+import com.example.quanla.smartschool.database.model.StudentIdCheckIn;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -45,8 +48,9 @@ public class StudentListHolder extends RecyclerView.ViewHolder {
         super(itemView);
         ButterKnife.bind(this,itemView);
         context=itemView.getContext();
+
     }
-    public void bind(Student student){
+    public void bind(final Student student){
         Picasso.with(context)
                 .load(student.getUrl())
                 .resize(100, 100)
@@ -54,5 +58,16 @@ public class StudentListHolder extends RecyclerView.ViewHolder {
                 .into(ivStudent);
         tvName.setText(student.getName());
         tvIdStudent.setText(student.getIdStudent());
+        cbCheckin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    StudentListActivity.studentids.add(new StudentIdCheckIn(student.getIdStudent()));
+                }
+                else {
+                    StudentListActivity.studentids.remove(new StudentIdCheckIn(student.getIdStudent()));
+                }
+            }
+        });
     }
 }

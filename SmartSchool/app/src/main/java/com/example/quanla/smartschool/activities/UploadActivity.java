@@ -80,16 +80,15 @@ public class UploadActivity extends AppCompatActivity {
             cursor.close();
             Bitmap bmp = BitmapFactory.decodeFile(path);
             ivPhoto.setImageBitmap(bmp);
-        }else if (requestCode==REQUEST_TAKE_PHOTO){
+        }else if (requestCode==REQUEST_TAKE_PHOTO&&resultCode==RESULT_OK){
              path="sdcard/camera_app/cam_image.jpg";
             Log.e(TAG, String.format("onActivityResult: %s", (new File(path)).getTotalSpace()) );
             ivPhoto.setImageDrawable(Drawable.createFromPath(path));
         }
-        Retrievedata retrievedata=new Retrievedata();
-        retrievedata.execute(path);
-
-        Log.e(TAG, String.format("onActivityResult: %s", path) );
-
+        if(path!=null) {
+            Retrievedata retrievedata = new Retrievedata();
+            retrievedata.execute(path);
+        }
     }
 
     private void addListener() {

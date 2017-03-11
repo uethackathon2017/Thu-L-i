@@ -29,6 +29,15 @@ public class DbStudentContext {
     private List<Student> students;
     private List<StudentRespon> studentRespon;
     private String idGroup;
+    private String nameGroup;
+
+    public String getNameGroup() {
+        return nameGroup;
+    }
+
+    public void setNameGroup(String nameGroup) {
+        this.nameGroup = nameGroup;
+    }
 
     public String getIdGroup() {
         return idGroup;

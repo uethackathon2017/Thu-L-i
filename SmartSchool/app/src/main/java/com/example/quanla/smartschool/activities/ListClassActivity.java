@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.ContextMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -39,7 +40,6 @@ public class ListClassActivity extends AppCompatActivity
 
     @BindView(R.id.rv_class_list)
     RecyclerView rvClassList;
-    ClassListAdapter classListAdapter = new ClassListAdapter(this);
     ProgressDialog progress;
 
     @Override
@@ -60,13 +60,13 @@ public class ListClassActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
     }
 
+
     public void setupUI()
     {
         progress = ProgressDialog.show(this, "Loading",
                 "Please waiting...", true);
         if (DbClassContext.instance.getStudents()!=null){
             progress.dismiss();
-            //classListAdapter = new ClassListAdapter(this);
             DbClassContext.instance.getAllGroup();
             rvClassList.setAdapter(new ClassListAdapter(this));
             rvClassList.setLayoutManager(new LinearLayoutManager(this));
