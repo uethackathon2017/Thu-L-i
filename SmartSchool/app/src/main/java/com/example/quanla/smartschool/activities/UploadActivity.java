@@ -18,12 +18,15 @@ import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cloudinary.Cloudinary;
@@ -35,14 +38,18 @@ import com.example.quanla.smartschool.database.model.Student;
 import com.example.quanla.smartschool.database.request.UrlImage;
 import com.example.quanla.smartschool.database.respon.FaceId;
 import com.example.quanla.smartschool.database.respon.IndentifyRespon;
+import com.example.quanla.smartschool.database.respon.PersionFaceId;
 import com.example.quanla.smartschool.database.respon.PersionId;
 import com.example.quanla.smartschool.eventbus.GetFaceIdSuccusEvent;
 import com.example.quanla.smartschool.eventbus.IdentifySuccusEvent;
 import com.example.quanla.smartschool.eventbus.UploadImageSuccusEvent;
+import com.example.quanla.smartschool.eventbus.UploadPersonFaceToServerEvent;
 import com.example.quanla.smartschool.networks.NetContextMicrosoft;
 import com.example.quanla.smartschool.networks.jsonModels.IndentifyBody;
 import com.example.quanla.smartschool.networks.services.FaceService;
+import com.example.quanla.smartschool.networks.services.StudentService;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -61,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import butterknife.BindInt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
@@ -69,10 +77,28 @@ import retrofit2.Response;
 
 public class UploadActivity extends AppCompatActivity {
     private static final String TAG = UploadActivity.class.toString();
+    private  int count =0;
+
+
+    private Context context;
+    @BindView(R.id.cv_information)
+    CardView cvInformation;
+@BindView(R.id.txt_namestudent)
+TextView txtName;
+    @BindView(R.id.txt_doticay)
+    TextView txtDoTincay;
+    @BindView(R.id.ib_left)
+    ImageButton ibRotationLeft;
+    @BindView(R.id.ib_right)
+    ImageButton ibRotationRight;
     @BindView(R.id.btn_capture)
     Button btCapture;
     @BindView(R.id.btn_fromLocal)
     Button btFromLocal;
+    @BindView(R.id.img_photo)
+    ImageView imgPhoto;
+    @BindView(R.id.txt_idstudent)
+            TextView txtID;
     Map uploadResult;
     ProgressDialog progress;
 
@@ -84,12 +110,14 @@ public class UploadActivity extends AppCompatActivity {
     private String[] PERMISSIONS = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private Intent intent;
+    private String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload);
         EventBus.getDefault().register(this);
+        context= this;
         ButterKnife.bind(this);
         addListener();
     }
@@ -146,6 +174,25 @@ public class UploadActivity extends AppCompatActivity {
             }
         });
     }
+    @Subscribe
+    public void uploadPersonFaceToServer(UploadPersonFaceToServerEvent event) {
+        Log.e(TAG, "uploadPersonFaceToServer: Vào up ngược" );
+        StudentService studentService = NetContextMicrosoft.instance.create(StudentService.class);
+        studentService.addPersionFace(DbStudentContext.instance.getIdGroup(),
+                event.getStudent().getPersonid(), new UrlImage(url))
+                .enqueue(new Callback<PersionFaceId>() {
+                    @Override
+                    public void onResponse(Call<PersionFaceId> call, Response<PersionFaceId> response) {
+                        Toast.makeText(UploadActivity.this, "Đã thêm ảnh trên server", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, String.format("onResponse: %s", response.body().toString()) );
+                    }
+
+                    @Override
+                    public void onFailure(Call<PersionFaceId> call, Throwable t) {
+                        Toast.makeText(UploadActivity.this, "Lỗi r :(", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
     @Subscribe
     public void onIndentifyPerson(IdentifySuccusEvent event) {
@@ -155,11 +202,49 @@ public class UploadActivity extends AppCompatActivity {
             for (int i = 0; i < indentifyRespons.size(); i++) {
                 List<PersionId> persionIds=indentifyRespons.get(i).getPersonsList();
                 for (int j = 0; j < persionIds.size(); j++) {
-                    Student student = DbStudentContext.instance.findStudent(persionIds.get(j).getPersonid());
+                    final Student student = DbStudentContext.instance.findStudent(persionIds.get(j).getPersonid());
                     if (student!=null) {
                         Log.e(TAG, String.format("onIndentifyPerson: %s", indentifyRespons.get(i).getCandidates().get(0).getConfidence()) );
                         students.add(student);
+                        Picasso.with(this).load(student.getUrl()).into(imgPhoto);
+                        StringBuilder string = new StringBuilder();
+                        string.append("Name: ").append(student.getName());
+                        cvInformation.setVisibility(View.VISIBLE);
+                        txtID.setText("Id: "+student.getIdStudent());
+                        txtName.setText(string);
+                        txtDoTincay.setText("Confidence: "+indentifyRespons.get(i).getCandidates().get(j).getConfidence()+"");
+                        ibRotationLeft.setVisibility(View.VISIBLE);
+                        ibRotationRight.setVisibility(View.VISIBLE);
+                        ibRotationLeft.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                count -=90;
+                                Picasso.with(context)
+                                        .load(student.getUrl())
+                                        .rotate(count)
+                                        .into(imgPhoto);
+
+                            }
+                        });
+                        ibRotationRight.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                count +=90;
+                                Picasso.with(context)
+                                        .load(student.getUrl())
+                                        .rotate(count)
+                                        .into(imgPhoto);
+                            }
+                        });
+
+
+                        EventBus.getDefault().post(new UploadPersonFaceToServerEvent(student));
                     }
+                    else{
+                        Toast.makeText(this, "Cannot indentify anyone", Toast.LENGTH_SHORT).show();
+                    }
+
+
                 }
 
             }
@@ -211,7 +296,7 @@ public class UploadActivity extends AppCompatActivity {
         uploadResult = null;
         try {
             uploadResult = cloudinary.uploader().upload(file, ObjectUtils.emptyMap());
-            String url = (String) uploadResult.get("url");
+            url = (String) uploadResult.get("url");
             UrlImage urlImage = new UrlImage(url);
             Log.e(TAG, String.format("setBtSummit: %s", url));
             EventBus.getDefault().post(new UploadImageSuccusEvent(url));

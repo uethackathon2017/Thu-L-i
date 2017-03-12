@@ -32,8 +32,6 @@ import butterknife.ButterKnife;
 
 public class ListClassActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    @BindView(R.id.avi)
-    AVLoadingIndicatorView avi;
     @BindView(R.id.rv_class_list)
     RecyclerView rvClassList;
     ProgressDialog progress;

@@ -19,8 +19,6 @@ public class ClassListHodler extends RecyclerView.ViewHolder {
     private String TAG = ClassListHodler.class.toString();
     @BindView(R.id.tv_classname)
     TextView tvClassName;
-    @BindView(R.id.tv_classsize)
-    TextView tvClassSize;
     @BindView(R.id.tv_classroom)
     TextView tvClassRoom;
 
@@ -30,7 +28,7 @@ public class ClassListHodler extends RecyclerView.ViewHolder {
     }
 
     public void bind(ClassStudent classStudent) {
-        tvClassName.setText(classStudent.getName());
-        tvClassRoom.setText(classStudent.getClassRoom());
+        tvClassName.setText("Class: " + classStudent.getName());
+        tvClassRoom.setText("Room: " + classStudent.getClassRoom());
     }
 }
