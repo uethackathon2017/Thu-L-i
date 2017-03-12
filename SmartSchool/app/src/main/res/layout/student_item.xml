@@ -31,7 +31,6 @@
                 android:id="@+id/tv_nameStudent"
                 android:layout_toEndOf="@+id/iv_student_img"
                 android:textSize="16sp"
-                android:text="bbbbbbb"
                 android:layout_alignParentTop="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -40,16 +39,24 @@
                 android:textSize="12sp"
                 android:layout_toEndOf="@+id/iv_student_img"
                 android:layout_below="@id/tv_nameStudent"
-                android:text="aaaaaaaaaaa"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
-            <CheckBox
-                android:id="@+id/cb_checkin"
+            <LinearLayout
                 android:layout_toEndOf="@+id/iv_student_img"
                 android:layout_below="@+id/tv_idStudent"
-                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="@string/i_m_danh"
+                    android:layout_marginEnd="16dp"
+                    android:layout_height="wrap_content" />
+            <CheckBox
+                android:id="@+id/cb_checkin"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+            </LinearLayout>
 
 
         </RelativeLayout>

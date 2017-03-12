@@ -77,14 +77,14 @@ import retrofit2.Response;
 
 public class UploadActivity extends AppCompatActivity {
     private static final String TAG = UploadActivity.class.toString();
-    private  int count =0;
+    private int count = 0;
 
 
     private Context context;
     @BindView(R.id.cv_information)
     CardView cvInformation;
-@BindView(R.id.txt_namestudent)
-TextView txtName;
+    @BindView(R.id.txt_namestudent)
+    TextView txtName;
     @BindView(R.id.txt_doticay)
     TextView txtDoTincay;
     @BindView(R.id.ib_left)
@@ -98,7 +98,7 @@ TextView txtName;
     @BindView(R.id.img_photo)
     ImageView imgPhoto;
     @BindView(R.id.txt_idstudent)
-            TextView txtID;
+    TextView txtID;
     Map uploadResult;
     ProgressDialog progress;
 
@@ -117,7 +117,7 @@ TextView txtName;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload);
         EventBus.getDefault().register(this);
-        context= this;
+        context = this;
         ButterKnife.bind(this);
         addListener();
     }
@@ -174,9 +174,10 @@ TextView txtName;
             }
         });
     }
+
     @Subscribe
     public void uploadPersonFaceToServer(UploadPersonFaceToServerEvent event) {
-        Log.e(TAG, "uploadPersonFaceToServer: Vào up ngược" );
+        Log.e(TAG, "uploadPersonFaceToServer: Vào up ngược");
         StudentService studentService = NetContextMicrosoft.instance.create(StudentService.class);
         studentService.addPersionFace(DbStudentContext.instance.getIdGroup(),
                 event.getStudent().getPersonid(), new UrlImage(url))
@@ -184,7 +185,7 @@ TextView txtName;
                     @Override
                     public void onResponse(Call<PersionFaceId> call, Response<PersionFaceId> response) {
                         Toast.makeText(UploadActivity.this, "Đã thêm ảnh trên server", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, String.format("onResponse: %s", response.body().toString()) );
+                        Log.e(TAG, String.format("onResponse: %s", response.body().toString()));
                     }
 
                     @Override
@@ -200,27 +201,28 @@ TextView txtName;
         List<Student> students = new Vector<>();
         if (indentifyRespons != null) {
             for (int i = 0; i < indentifyRespons.size(); i++) {
-                List<PersionId> persionIds=indentifyRespons.get(i).getPersonsList();
+                List<PersionId> persionIds = indentifyRespons.get(i).getPersonsList();
                 for (int j = 0; j < persionIds.size(); j++) {
                     final Student student = DbStudentContext.instance.findStudent(persionIds.get(j).getPersonid());
-                    if (student!=null) {
-                        Log.e(TAG, String.format("onIndentifyPerson: %s", indentifyRespons.get(i).getCandidates().get(0).getConfidence()) );
+                    if (student != null) {
+                        Log.e(TAG, String.format("onIndentifyPerson: %s", indentifyRespons.get(i).getCandidates().get(0).getConfidence()));
                         students.add(student);
-                        Picasso.with(this).load(student.getUrl()).into(imgPhoto);
+                        Picasso.with(this).load(student.getUrl()).resize(480, 720).centerInside().into(imgPhoto);
                         StringBuilder string = new StringBuilder();
                         string.append("Name: ").append(student.getName());
                         cvInformation.setVisibility(View.VISIBLE);
-                        txtID.setText("Id: "+student.getIdStudent());
+                        txtID.setText("Id: " + student.getIdStudent());
                         txtName.setText(string);
-                        txtDoTincay.setText("Confidence: "+indentifyRespons.get(i).getCandidates().get(j).getConfidence()+"");
+                        txtDoTincay.setText("Confidence: " + indentifyRespons.get(i).getCandidates().get(j).getConfidence() + "");
                         ibRotationLeft.setVisibility(View.VISIBLE);
                         ibRotationRight.setVisibility(View.VISIBLE);
                         ibRotationLeft.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                count -=90;
+                                count -= 90;
                                 Picasso.with(context)
                                         .load(student.getUrl())
+                                        .resize(480, 720).centerInside()
                                         .rotate(count)
                                         .into(imgPhoto);
 
@@ -229,9 +231,10 @@ TextView txtName;
                         ibRotationRight.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                count +=90;
+                                count += 90;
                                 Picasso.with(context)
                                         .load(student.getUrl())
+                                        .resize(480, 720).centerInside()
                                         .rotate(count)
                                         .into(imgPhoto);
                             }
@@ -239,8 +242,7 @@ TextView txtName;
 
 
                         EventBus.getDefault().post(new UploadPersonFaceToServerEvent(student));
-                    }
-                    else{
+                    } else {
                         Toast.makeText(this, "Cannot indentify anyone", Toast.LENGTH_SHORT).show();
                     }
 
@@ -254,7 +256,7 @@ TextView txtName;
 
             }
         }
-        path=null;
+        path = null;
     }
 
     private void doAction() {
